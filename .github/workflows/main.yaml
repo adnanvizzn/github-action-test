@@ -28,7 +28,7 @@ jobs:
 
   run-matrix-tests:
     name: Run Matrix Integration Tests
-    runs-on: namespace-profile-vizzn
+    runs-on: ubuntu-latest
     needs: build-base
     strategy:
       matrix:
