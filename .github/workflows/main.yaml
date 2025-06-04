@@ -1,4 +1,4 @@
-name: All Integration Tests Android TestLab
+name: Gradle Test Workflow
 
 on:
   workflow_dispatch: # to manually run this workflow
