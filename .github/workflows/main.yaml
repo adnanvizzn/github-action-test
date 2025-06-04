@@ -1,0 +1,50 @@
+name: All Integration Tests Android TestLab
+
+on:
+  workflow_dispatch: # to manually run this workflow
+
+
+env:
+  FLUTTER_CHANNEL: 'stable'
+  FLUTTER_VERSION: '3.29.3'
+  GRADLE_VERSION: '8.10.2'
+  JAVA_VERSION: '17'
+
+jobs:
+  build-base:
+    name: Creating Gradle Setup and Assembling Android Instrumented Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+          cache: true
+
+
+
+  run-matrix-tests:
+    name: Run Matrix Integration Tests
+    runs-on: namespace-profile-vizzn
+    needs: build-base
+    strategy:
+      matrix:
+        test_module:
+          - name: "Calendar_Subscribed"
+            path: "integration_test/subscribed_test.dart"
+          - name: "Comms"
+            path: "integration_test/comms_test.dart"
+          - name: "Dispatch"
+            path: "integration_test/dispatch_test.dart"
+          - name: "Files_And_Folders"
+            path: "integration_test/files_and_folders_test.dart"
+      fail-fast: false # Continue running other tests even if one fails
+
+    steps:
+      - name: Assemble Android Instrumented Unit Test
+        working-directory: android
+        run: gradle app:assembleAndroidTest
+
