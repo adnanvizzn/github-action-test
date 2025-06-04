@@ -1,0 +1,111 @@
+name: Upload and Download File Workflow
+on:
+  workflow_dispatch: # to manually run this workflow
+
+jobs:
+  upload-file:
+    name: Upload README File
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify README.md exists
+        run: |
+          if [ ! -f README.md ]; then
+            echo "README.md not found, creating a sample one"
+            echo "# Sample README" > README.md
+            echo "This is a test README file for artifact sharing." >> README.md
+            echo "Created at: $(date)" >> README.md
+          else
+            echo "README.md found, using existing file"
+          fi
+
+      - name: Display README content
+        run: |
+          echo "Content of README.md:"
+          cat README.md
+
+      - name: Upload README as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-file
+          path: README.md
+          retention-days: 1 # Keep artifact for 1 day only
+
+  download-file:
+    name: Download and Process README File
+    runs-on: ubuntu-latest
+    needs: upload-file # This job depends on upload-file job completion
+    steps:
+      - name: Download README artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: readme-file
+          path: ./downloaded-files/
+
+      - name: Verify downloaded file
+        run: |
+          echo "Files in downloaded directory:"
+          ls -la ./downloaded-files/
+
+      - name: Display downloaded README content
+        run: |
+          echo "Content of downloaded README.md:"
+          cat ./downloaded-files/README.md
+
+      - name: Process downloaded file (example operations)
+        run: |
+          # Example: Add timestamp to the file
+          echo "" >> ./downloaded-files/README.md
+          echo "Downloaded and processed at: $(date)" >> ./downloaded-files/README.md
+          
+          # Example: Create a backup copy
+          cp ./downloaded-files/README.md ./downloaded-files/README-backup.md
+          
+          # Example: Show final content
+          echo "Final processed content:"
+          cat ./downloaded-files/README.md
+
+      - name: Upload processed file (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-readme-file
+          path: ./downloaded-files/
+          retention-days: 1
+
+  run-matrix-tests:
+    name: Run Matrix Integration Tests with Downloaded File
+    runs-on: ubuntu-latest
+    needs: download-file # This job depends on download-file job completion
+    strategy:
+      matrix:
+        test_module:
+          - name: "Calendar_Subscribed"
+            path: "integration_test/subscribed_test.dart"
+          - name: "Comms"
+            path: "integration_test/comms_test.dart"
+          - name: "Dispatch"
+            path: "integration_test/dispatch_test.dart"
+          - name: "Files_And_Folders"
+            path: "integration_test/files_and_folders_test.dart"
+      fail-fast: false # Continue running other tests even if one fails
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download README artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: processed-readme-file
+          path: ./test-files/
+
+      - name: Run test simulation for ${{ matrix.test_module.name }}
+        run: |
+          echo "Running test: ${{ matrix.test_module.name }}"
+          echo "Test path: ${{ matrix.test_module.path }}"
+          echo "Using downloaded file:"
+          cat ./test-files/README.md
+          
+          # Simulate test execution
+          echo "Test ${{ matrix.test_module.name }} completed successfully"
