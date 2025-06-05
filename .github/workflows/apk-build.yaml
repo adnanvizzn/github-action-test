@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     container:
       image: adnan4772/flutter-android-setup:latest
       options: --platform linux/amd64
@@ -24,5 +23,8 @@ jobs:
       - name: Print Gradle Version
         run: gradle --version
 
-      - name: Build APK
-        run: gradle app:assembleAndroidTest
+      - name: Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Get Flutter Dependencies
+        run: flutter pub get
