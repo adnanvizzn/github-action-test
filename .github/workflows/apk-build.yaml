@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-latest
     container:
       image: adnan4772/flutter-android-setup:latest
 
