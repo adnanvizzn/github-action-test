@@ -7,33 +7,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    container:
+      image: adnan4772/flutter-android-build:latest
+      options: --user root
+
     steps:
-      # Checkout the repository code
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Build the Docker image using the provided Dockerfile
-      - name: Build Docker image
-        run: docker build -t flutter-android-build .
+      - name: Print Flutter Version
+        run: flutter --version
 
-      # Run the Docker container and execute the build steps
-      - name: Run build in Docker
-        run: |
-          docker run --rm -v $(pwd):/app flutter-android-build bash -c "
-            # Print versions
-            echo 'Flutter version:'
-            flutter --version
-            echo 'Java version:'
-            java --version
-            echo 'Gradle version:'
-            gradle --version
-            # Run Gradle command to build APK
-            gradle app:assembleAndroidTest
-          "
+      - name: Print Java Version
+        run: java --version
 
-      # Store the generated APK as an artifact
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-test-apk
-          path: app/build/outputs/apk/androidTest/**/*.apk
+      - name: Print Gradle Version
+        run: gradle --version
+
+      - name: Build APK
+        run: gradle app:assembleAndroidTest
