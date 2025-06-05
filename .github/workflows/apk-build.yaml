@@ -9,7 +9,7 @@ jobs:
 
     container:
       image: adnan4772/flutter-android-setup:latest
-      options: --user root
+      
 
     steps:
       - name: Checkout Repository
