@@ -9,7 +9,7 @@ jobs:
 
     container:
       image: adnan4772/flutter-android-setup:latest
-      
+      options: --platform linux/amd64
 
     steps:
       - name: Checkout Repository
