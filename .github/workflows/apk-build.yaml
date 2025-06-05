@@ -1,0 +1,55 @@
+name: Build Flutter APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t flutter-android-setup .
+
+      - name: Print versions and build APK
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app flutter-android-setup /bin/bash -c "
+            echo '=== System Information ===' &&
+            echo 'Flutter Version:' &&
+            flutter --version &&
+            echo '' &&
+            echo 'Java Version:' &&
+            java --version &&
+            echo '' &&
+            echo 'Gradle Version:' &&
+            gradle --version &&
+            echo '' &&
+            echo 'Android SDK Root: $ANDROID_SDK_ROOT' &&
+            echo '' &&
+            echo '=== Starting Flutter Build ===' &&
+            flutter clean &&
+            flutter pub get &&
+            flutter build apk --release
+          "
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Upload APK to release (if tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
