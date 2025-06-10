@@ -22,5 +22,8 @@ jobs:
       - name: Print Gradle Version
         run: gradle --version
 
+      - name: Print Node.js Version
+        run: node --version
+
       - name: Flutter Doctor
         run: flutter doctor -v
