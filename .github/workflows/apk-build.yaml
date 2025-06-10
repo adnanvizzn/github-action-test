@@ -25,5 +25,8 @@ jobs:
       - name: Print Node.js Version
         run: node --version
 
+      - name: Print NPM Version
+        run: npm --version
+
       - name: Flutter Doctor
         run: flutter doctor -v
